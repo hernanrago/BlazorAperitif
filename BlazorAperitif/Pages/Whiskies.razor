@@ -1,0 +1,39 @@
+﻿@page "/whiskies"
+
+@using DataLibrary
+@using BlazorAperitif.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _dataAccess
+@inject IConfiguration  _config
+
+<h3>Whiskies</h3>
+
+<button class="btn btn-primary" @onclick="InsertData">Add whisky</button>
+
+@if(whiskies == null)
+{
+    <p><em>Loading...</em></p>
+}else
+{
+    @foreach(var item in whiskies)
+    {
+        <p>@item.Name</p>
+    }
+}
+
+@code {
+    IEnumerable<Whisky> whiskies;
+
+    private async Task InsertData()
+    {
+        string sql = "insert into whiskies (Id, Name) values (@Id, @Name);";
+
+        await _dataAccess.SaveData(sql, new { Id = 001, Name = "Lagavulin"}, _config.GetConnectionString("default"));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from whiskies";
+        whiskies = await _dataAccess.LoadData<Whisky, dynamic>(sql, new { }, _config.GetConnectionString("default"));
+    }
+}
